@@ -65,7 +65,10 @@ func main() {
 
 	addr := os.Getenv("PORT")
 	if addr == "" {
-		addr = ":8080"
+		addr = "8080"
+	}
+	if addr[0] != ':' {
+		addr = ":" + addr
 	}
 
 	servidor := &http.Server{
