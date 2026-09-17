@@ -1,0 +1,13 @@
+[
+  {
+    "id": 1,
+    "usuario": "Johan",
+    "email": "johanchamorales@gmail.com",
+    "rol": "ADMINISTRADOR",
+    "hash_password": "162f34d8768221c1f3dae00f2b4a53cc29a9e2433154ed983b1e5c3dc29f80d1",
+    "salt": "4f5250257d8624462c3d9162aaebd575",
+    "activo": true,
+    "fecha_creacion": "2026-09-16T20:19:47.7027504Z",
+    "ultimo_acceso": "2026-09-17T14:49:34.1661178Z"
+  }
+]

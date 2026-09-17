@@ -1,0 +1,155 @@
+[
+  {
+    "id": 1,
+    "usuario": "sistema",
+    "fecha_hora": "2026-09-16T20:19:47.7221712Z",
+    "accion": "CREÓ USUARIO",
+    "documento_afectado": "Johan",
+    "detalle": "Rol Administrador"
+  },
+  {
+    "id": 2,
+    "usuario": "sistema",
+    "fecha_hora": "2026-09-16T20:20:00.5071789Z",
+    "accion": "INICIÓ SESIÓN",
+    "documento_afectado": "Johan"
+  },
+  {
+    "id": 3,
+    "usuario": "sistema",
+    "fecha_hora": "2026-09-16T20:40:38.1427336Z",
+    "accion": "INICIÓ SESIÓN",
+    "documento_afectado": "Johan"
+  },
+  {
+    "id": 4,
+    "usuario": "sistema",
+    "fecha_hora": "2026-09-16T21:04:03.7897513Z",
+    "accion": "INICIÓ SESIÓN",
+    "documento_afectado": "Johan"
+  },
+  {
+    "id": 5,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-16T21:36:21.0749856Z",
+    "accion": "CREÓ COOPERATIVA",
+    "documento_afectado": "Micoope",
+    "detalle": "NIT 1560315-6"
+  },
+  {
+    "id": 6,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-16T21:36:27.4883259Z",
+    "accion": "CREÓ BANCO",
+    "documento_afectado": "Banrural"
+  },
+  {
+    "id": 7,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-16T21:38:09.8612795Z",
+    "accion": "CREÓ CUENTA",
+    "documento_afectado": "Cuenta 6546654586",
+    "detalle": "Cooperativa Cobán"
+  },
+  {
+    "id": 8,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-16T21:40:51.91487Z",
+    "accion": "CREÓ CUENTA",
+    "documento_afectado": "Cuenta 6546654587",
+    "detalle": "Cooperativa Cobán"
+  },
+  {
+    "id": 9,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-16T21:40:59.1924364Z",
+    "accion": "ELIMINÓ CUENTA",
+    "documento_afectado": "Cuenta 6546654587",
+    "detalle": "Cooperativa Cobán"
+  },
+  {
+    "id": 10,
+    "usuario": "sistema",
+    "fecha_hora": "2026-09-16T21:59:06.985626Z",
+    "accion": "INICIÓ SESIÓN",
+    "documento_afectado": "Johan"
+  },
+  {
+    "id": 11,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-16T21:59:23.3194797Z",
+    "accion": "REGISTRÓ INGRESO",
+    "documento_afectado": "ingreso 12346789 de la cuenta 6546654586",
+    "detalle": "Q 15000.00 · Pago Planillas"
+  },
+  {
+    "id": 12,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-16T21:59:48.9516921Z",
+    "accion": "REGISTRÓ EGRESO",
+    "documento_afectado": "egreso 111444666 de la cuenta 6546654586",
+    "detalle": "Q 15000.00 · Pago Planillas"
+  },
+  {
+    "id": 13,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-16T22:00:13.2369444Z",
+    "accion": "REGISTRÓ EGRESO",
+    "documento_afectado": "egreso 11223345688 de la cuenta 6546654586",
+    "detalle": "Q 1555.00 · Pago Planillas"
+  },
+  {
+    "id": 14,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-16T22:02:27.6327781Z",
+    "accion": "REGISTRÓ COBRO DE CHEQUE",
+    "documento_afectado": "egreso 11223345688 de la cuenta 6546654586",
+    "detalle": "Cobrado el 2026-09-16"
+  },
+  {
+    "id": 15,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-16T22:04:07.1743541Z",
+    "accion": "ANULÓ EGRESO",
+    "documento_afectado": "egreso 111444666 de la cuenta 6546654586",
+    "detalle": "Dueño desaparecido"
+  },
+  {
+    "id": 16,
+    "usuario": "sistema",
+    "fecha_hora": "2026-09-16T22:28:12.6655956Z",
+    "accion": "INICIÓ SESIÓN",
+    "documento_afectado": "Johan"
+  },
+  {
+    "id": 17,
+    "usuario": "sistema",
+    "fecha_hora": "2026-09-17T14:09:37.2944809Z",
+    "accion": "INICIÓ SESIÓN",
+    "documento_afectado": "Johan"
+  },
+  {
+    "id": 18,
+    "usuario": "sistema",
+    "fecha_hora": "2026-09-17T14:31:58.6082618Z",
+    "accion": "INICIÓ SESIÓN",
+    "documento_afectado": "Johan"
+  },
+  {
+    "id": 19,
+    "usuario": "sistema",
+    "fecha_hora": "2026-09-17T14:49:34.1677267Z",
+    "accion": "INICIÓ SESIÓN",
+    "documento_afectado": "Johan"
+  }
+]
