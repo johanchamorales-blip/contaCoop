@@ -141,6 +141,40 @@ func TestUsuariosEliminar(t *testing.T) {
 	})
 }
 
+func TestUsuariosDeshabilitar(t *testing.T) {
+	dir := t.TempDir()
+	dirigirStores(t, dir)
+	m := http.NewServeMux()
+	m.HandleFunc("/api/usuarios", RequiereSesion("usuarios", Usuarios))
+
+	b, _ := json.Marshal([]models.Usuario{
+		{ID: 1, Usuario: "Admin", Rol: models.RolAdministrador, Activo: true},
+		{ID: 2, Usuario: "Pepe", Rol: models.RolContador, Activo: true},
+	})
+	if err := os.WriteFile(filepath.Join(dir, "data", "usuarios.json"), b, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	rr := peticion(t, m, http.MethodPatch, "/api/usuarios", `{"id":2,"activo":false}`)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("deshabilitar: estado %d, cuerpo %s", rr.Code, rr.Body.String())
+	}
+	if !strings.Contains(rr.Body.String(), `"activo":false`) {
+		t.Fatalf("no quedó inactivo: %s", rr.Body.String())
+	}
+
+	rr = peticion(t, m, http.MethodGet, "/api/usuarios", "")
+	if !strings.Contains(rr.Body.String(), `"usuario":"Pepe"`) || !strings.Contains(rr.Body.String(), `"activo":false`) {
+		t.Fatalf("el listado debía mostrar a Pepe inactivo: %s", rr.Body.String())
+	}
+
+	// No puede cambiar su propio acceso.
+	rr = peticion(t, m, http.MethodPatch, "/api/usuarios", `{"id":1,"activo":false}`)
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("modificar el propio acceso debía dar 400, dio %d: %s", rr.Code, rr.Body.String())
+	}
+}
+
 func mux() http.Handler {
 	m := http.NewServeMux()
 	m.HandleFunc("/api/recordatorios", RequiereSesion("movimientos", Recordatorios))
