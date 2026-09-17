@@ -4,13 +4,25 @@
     "ignore": [
       "firebase.json",
       "**/.*",
+      "**/.*/**",
       "**/node_modules/**",
       "data/**",
+      "cmd/**",
+      ".agents/**",
       "handlers/**",
       "models/**",
       "services/**",
       "*.go",
-      "*.exe"
+      "*.exe",
+      "*.md",
+      "go.mod",
+      "go.sum",
+      "Dockerfile",
+      "repomix-output.xml",
+      "neon.ts",
+      "package.json",
+      "package-lock.json",
+      "skills-lock.json"
     ],
     "rewrites": [
       {
