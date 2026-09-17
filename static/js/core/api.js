@@ -14,19 +14,20 @@ export class ErrorAPI extends Error {
 }
 
 async function peticion(url, opciones = {}) {
-  const respuesta = await fetch(url, {
+  const urlCompleta = url.startsWith('http') ? url : `https://contacoop.onrender.com${url}`;
+  const respuesta = await fetch(urlCompleta, {
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'same-origin',
+    credentials: 'include',
     ...opciones,
   });
 
   const tipo = respuesta.headers.get('content-type') || '';
   const cuerpo = tipo.includes('application/json') ? await respuesta.json() : await respuesta.text();
 
-  if (respuesta.status === 401 && !url.startsWith('/api/auth/login')) {
-    oyentesSinSesion.forEach((fn) => fn());
-    throw new ErrorAPI('Tu sesión expiró. Vuelve a iniciar sesión.', 401);
-  }
+  if (respuesta.status === 401 && !url.includes('/api/auth/login') && !url.includes('/api/auth/sesion')) {
+      oyentesSinSesion.forEach((fn) => fn());
+      throw new ErrorAPI('Tu sesión expiró. Vuelve a iniciar sesión.', 401);
+    }
   if (!respuesta.ok) {
     const mensaje = (cuerpo && cuerpo.error) || 'No se pudo completar la operación';
     throw new ErrorAPI(mensaje, respuesta.status);

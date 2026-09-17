@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	cookieSesion    = "sesion_cuentas"
-	duracionSesion  = 8 * time.Hour
-	claveSesionCtx  = "sesion"
+	cookieSesion   = "sesion_cuentas"
+	duracionSesion = 8 * time.Hour
+	claveSesionCtx = "sesion"
 )
 
 type sesion struct {
@@ -59,7 +59,8 @@ func abrirSesion(w http.ResponseWriter, u models.Usuario) error {
 		Value:    token,
 		Path:     "/",
 		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
+		Secure:   true,                  // Requerido obligatoriamente por los navegadores al usar SameSiteNone
+		SameSite: http.SameSiteNoneMode, // Permite compartir la cookie entre Firebase y Render
 		MaxAge:   int(duracionSesion.Seconds()),
 	})
 	return nil
@@ -196,9 +197,9 @@ func Sesion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	respuesta := map[string]any{
-		"autenticado":     false,
-		"requiere_alta":   len(usuarios) == 0,
-		"roles":           services.RolesDisponibles(),
+		"autenticado":   false,
+		"requiere_alta": len(usuarios) == 0,
+		"roles":         services.RolesDisponibles(),
 	}
 	if usuario, ok := SesionDe(r); ok {
 		respuesta["autenticado"] = true
