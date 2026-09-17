@@ -59,6 +59,7 @@ func dirigirStores(t *testing.T, dir string) {
 	catalogo("conciliaciones.json", []models.Conciliacion{})
 	catalogo("auditoria.json", []models.Auditoria{})
 	catalogo("recordatorios.json", []models.Recordatorio{})
+	catalogo("usuarios.json", []models.Usuario{})
 }
 
 func sesionCookie(t *testing.T) *http.Cookie {
@@ -84,6 +85,60 @@ func peticion(t *testing.T, handler http.Handler, metodo, url string, cuerpo str
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	return rr
+}
+
+func TestUsuariosEliminar(t *testing.T) {
+	dir := t.TempDir()
+	dirigirStores(t, dir)
+	m := http.NewServeMux()
+	m.HandleFunc("/api/usuarios", RequiereSesion("usuarios", Usuarios))
+
+	escribirUsuarios := func(usuarios []models.Usuario) {
+		t.Helper()
+		b, _ := json.Marshal(usuarios)
+		if err := os.WriteFile(filepath.Join(dir, "data", "usuarios.json"), b, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	t.Run("elimina un usuario existente", func(t *testing.T) {
+		escribirUsuarios([]models.Usuario{{ID: 1, Usuario: "Admin", Rol: models.RolAdministrador, Activo: true},
+			{ID: 2, Usuario: "Pepe", Rol: models.RolContador, Activo: true}})
+
+		rr := peticion(t, m, http.MethodDelete, "/api/usuarios?id=2", "")
+		if rr.Code != http.StatusOK {
+			t.Fatalf("eliminar: estado %d, cuerpo %s", rr.Code, rr.Body.String())
+		}
+		rr = peticion(t, m, http.MethodGet, "/api/usuarios", "")
+		if !strings.Contains(rr.Body.String(), `"usuario":"Admin"`) || strings.Contains(rr.Body.String(), "Pepe") {
+			t.Fatalf("tras eliminar debe quedar solo Admin: %s", rr.Body.String())
+		}
+	})
+
+	t.Run("rechaza eliminar el propio acceso", func(t *testing.T) {
+		escribirUsuarios([]models.Usuario{{ID: 1, Usuario: "Admin", Rol: models.RolAdministrador, Activo: true}})
+		rr := peticion(t, m, http.MethodDelete, "/api/usuarios?id=1", "")
+		if rr.Code != http.StatusBadRequest {
+			t.Fatalf("auto-borrado debería dar 400, dio %d: %s", rr.Code, rr.Body.String())
+		}
+	})
+
+	t.Run("rechaza eliminar el último administrador", func(t *testing.T) {
+		escribirUsuarios([]models.Usuario{{ID: 1, Usuario: "Admin", Rol: models.RolContador, Activo: true},
+			{ID: 3, Usuario: "UnicaAdmin", Rol: models.RolAdministrador, Activo: true}})
+		rr := peticion(t, m, http.MethodDelete, "/api/usuarios?id=3", "")
+		if rr.Code != http.StatusBadRequest {
+			t.Fatalf("borrar el último administrador debería dar 400, dio %d: %s", rr.Code, rr.Body.String())
+		}
+	})
+
+	t.Run("devuelve 404 si el usuario no existe", func(t *testing.T) {
+		escribirUsuarios([]models.Usuario{{ID: 1, Usuario: "Admin", Rol: models.RolAdministrador, Activo: true}})
+		rr := peticion(t, m, http.MethodDelete, "/api/usuarios?id=99", "")
+		if rr.Code != http.StatusNotFound {
+			t.Fatalf("borrar inexistente debería dar 404, dio %d: %s", rr.Code, rr.Body.String())
+		}
+	})
 }
 
 func mux() http.Handler {

@@ -1,9 +1,12 @@
 # Sistema de movimientos de cuentas — Libro de Bancos
 
-Aplicación web en Go (sin dependencias externas) para llevar el libro de bancos
+Aplicación web en Go para llevar el libro de bancos
 de varias cooperativas: catálogos, ingresos y egresos, saldo corrido,
-conciliación bancaria y bitácora de auditoría. Los datos se guardan en archivos
-JSON dentro de `data/`.
+conciliación bancaria y bitácora de auditoría.
+
+Los datos se guardan en archivos JSON dentro de `data/` para uso local; si se
+define la variable de entorno `DATABASE_URL`, se guardan en PostgreSQL y
+sobreviven a los reinicios del contenedor (Replicas de Render, etc.).
 
 ## Ejecutar
 
@@ -16,6 +19,13 @@ Luego abrir <http://localhost:8080>. El primer usuario que se registre queda
 como **Administrador**; a partir de ahí solo un administrador puede crear
 accesos nuevos.
 
+### Persistencia en PostgreSQL
+
+En el entorno alojado (Render) configura la variable `DATABASE_URL` con el DSN
+de tu base (por ejemplo la de Render o Neon). El primer arranque importa el
+contenido de `data/*.json` si la base está vacía; después, cualquier cambio se
+escribe directamente en PostgreSQL y ya no se pierde al reiniciar.
+
 ## Roles
 
 | Rol | Puede |
@@ -27,12 +37,16 @@ accesos nuevos.
 Las lecturas están abiertas a cualquier sesión válida; los permisos se exigen
 en las operaciones que modifican datos.
 
+En la pestaña **Usuarios y roles** el administrador puede habilitar,
+deshabilitar o **eliminar** accesos. Nunca puede eliminar su propio acceso ni
+dejar el sistema sin al menos un administrador activo.
+
 ## Organización del código
 
 ```
 models/      Modelos y el tipo Fecha (día calendario, sin zona horaria)
 services/    Reglas de negocio: dinero, saldos, movimientos, libro,
-             conciliación, búsqueda difusa, NIT, usuarios
+             conciliación, búsqueda difusa, NIT, usuarios, almacenamiento
 handlers/    Endpoints HTTP, sesiones y transacción global
 static/css/  tokens · base · app · print
 static/js/core/   api · estado · vista · pestanas · dom · formato ·
@@ -106,7 +120,7 @@ de Egresos.
 | GET | `/api/reportes/anual[.csv]` | Evolución mes a mes de una cuenta durante el año |
 | GET/POST/PATCH/DELETE | `/api/recordatorios` | Tareas pendientes del equipo (PATCH cierra o reabre) |
 | GET | `/api/resumen`, `/api/busqueda`, `/api/auditoria` | Panel, búsqueda difusa y bitácora |
-| GET/PATCH | `/api/usuarios` | Accesos y roles |
+| GET/PATCH/DELETE | `/api/usuarios` | Accesos y roles (DELETE elimina la cuenta, con `?id=`) |
 
 ## Impresión
 

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -272,6 +273,57 @@ func Usuarios(w http.ResponseWriter, r *http.Request) {
 		})
 		if err != nil {
 			responderError(w, err)
+		}
+	case http.MethodDelete:
+		id, err := strconv.Atoi(strings.TrimSpace(r.URL.Query().Get("id")))
+		if err != nil || id <= 0 {
+			writeError(w, http.StatusBadRequest, "indica el usuario a eliminar")
+			return
+		}
+		actual, _ := SesionDe(r)
+		if actual.ID == id {
+			writeError(w, http.StatusBadRequest, "no puedes eliminar tu propio acceso")
+			return
+		}
+		errTx := enTransaccion(func() error {
+			usuarios, err := usuarioStore.Read()
+			if err != nil {
+				return err
+			}
+			var administradores, encontrado int
+			for _, u := range usuarios {
+				if u.Rol == models.RolAdministrador && u.Activo {
+					administradores++
+				}
+				if u.ID == id {
+					encontrado++
+				}
+			}
+			if encontrado == 0 {
+				writeError(w, http.StatusNotFound, "el usuario no existe")
+				return nil
+			}
+			for i := range usuarios {
+				if usuarios[i].ID != id {
+					continue
+				}
+				if usuarios[i].Rol == models.RolAdministrador && administradores <= 1 {
+					writeError(w, http.StatusBadRequest, "no puedes eliminar el último administrador")
+					return nil
+				}
+				eliminado := usuarios[i]
+				usuarios = append(usuarios[:i], usuarios[i+1:]...)
+				if err := usuarioStore.Write(usuarios); err != nil {
+					return err
+				}
+				auditar(r, "ELIMINÓ USUARIO", eliminado.Usuario, "Rol "+services.NombreRol(eliminado.Rol))
+				writeJSON(w, http.StatusOK, eliminado.Publico())
+				return nil
+			}
+			return nil
+		})
+		if errTx != nil {
+			responderError(w, errTx)
 		}
 	default:
 		methodNotAllowed(w)

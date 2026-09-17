@@ -1,6 +1,7 @@
 import { Vista } from '../core/vista.js';
 import { api } from '../core/api.js';
 import { escapar, datosFormulario } from '../core/dom.js';
+import { confirmar } from '../core/dialogo.js';
 import { fechaHora, nombreRol } from '../core/formato.js';
 import { exito, problema } from '../core/notificaciones.js';
 
@@ -39,6 +40,7 @@ export class Usuarios extends Vista {
   conectar() {
     this.alEnviar('[data-formulario="usuario"]', (form) => this.crear(form));
     this.alHacerClic('[data-activar]', (boton) => this.cambiarEstado(Number(boton.dataset.activar), boton.dataset.valor === 'true'));
+    this.alHacerClic('[data-eliminar]', (boton) => this.eliminar(Number(boton.dataset.eliminar), boton.dataset.nombre));
   }
 
   async crear(form) {
@@ -62,12 +64,29 @@ export class Usuarios extends Vista {
     }
   }
 
+  async eliminar(id, usuario) {
+    const confirmo = await confirmar(
+      'Eliminar acceso',
+      `Se va a eliminar la cuenta de "${usuario}". No podrá volver a entrar con ella.`,
+      { confirmar: 'Eliminar', peligro: true },
+    );
+    if (!confirmo) return;
+    try {
+      await api.eliminar(`/api/usuarios?id=${id}`);
+      exito('Acceso eliminado');
+      await this.actualizar();
+    } catch (error) {
+      problema(error.message);
+    }
+  }
+
   async actualizar() {
     const usuarios = await api.obtener('/api/usuarios');
+    const propioID = this.estado.usuario?.id;
     this.$('[data-zona="lista"]').innerHTML = usuarios.map((u) => `
       <div class="elemento">
         <div>
-          <strong>${escapar(u.usuario)}</strong>
+          <strong>${escapar(u.usuario)}${Number(u.id) === Number(propioID) ? ' (tú)' : ''}</strong>
           <small>${escapar(u.email)} · ${escapar(nombreRol(u.rol))}</small>
           <small>${u.ultimo_acceso && !u.ultimo_acceso.startsWith('0001') ? `Último acceso: ${fechaHora(u.ultimo_acceso)}` : 'Sin accesos todavía'}</small>
         </div>
@@ -76,6 +95,8 @@ export class Usuarios extends Vista {
           <button type="button" class="enlace" data-activar="${u.id}" data-valor="${!u.activo}">
             ${u.activo ? 'Deshabilitar' : 'Habilitar'}
           </button>
+          ${Number(u.id) === Number(propioID) ? '' : `
+          <button type="button" class="enlace" data-eliminar="${u.id}" data-nombre="${escapar(u.usuario)}">Eliminar</button>`}
         </div>
       </div>`).join('');
   }

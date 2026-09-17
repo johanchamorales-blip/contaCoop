@@ -1,5 +1,5 @@
 # Imagen base oficial de Go
-FROM golang:1.22-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 

@@ -9,11 +9,26 @@ import (
 	"time"
 
 	"sistema-cuentas/handlers"
+	"sistema-cuentas/services"
 )
 
 func main() {
 	if err := prepararDatos(); err != nil {
 		log.Fatal(err)
+	}
+
+	// Si hay DATABASE_URL los datos se guardan en PostgreSQL, que sobrevive a
+	// los reinicios del contenedor; si no, se usan los archivos de data/.
+	if dsn := os.Getenv("DATABASE_URL"); dsn != "" {
+		cerrar, err := services.UsarPostgres(dsn)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer cerrar()
+		if err := services.SembrarDesdeArchivos("data"); err != nil {
+			log.Fatalf("sembrar datos iniciales: %v", err)
+		}
+		log.Println("Base de datos PostgreSQL conectada")
 	}
 
 	mux := http.NewServeMux()
