@@ -4,8 +4,8 @@ import { escapar, opcionesMes } from '../core/dom.js';
 import { dinero, fecha, periodo } from '../core/formato.js';
 import { problema } from '../core/notificaciones.js';
 
-// URL base de tu backend Go (cambia 'TU_IP_O_DOMINIO' por la dirección real de tu servidor Go)
-const API_BASE_URL = "http://TU_IP_O_DOMINIO:8080"; // Ejemplo: "http://192.168.1.50:8080" o "http://TU_DOMINIO.com:8080"
+// URL base de tu backend Go en Render
+const API_BASE_URL = "https://contacoop.onrender.com";
 
 // Libro de bancos: la tabla con saldo corrido y, al imprimir, el archivo Excel
 // con el formato oficial de la cooperativa.

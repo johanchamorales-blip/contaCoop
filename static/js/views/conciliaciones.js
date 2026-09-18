@@ -4,8 +4,8 @@ import { escapar, datosFormulario, opcionesMes } from '../core/dom.js';
 import { dinero, fecha, periodo } from '../core/formato.js';
 import { exito, problema, pendiente } from '../core/notificaciones.js';
 
-// URL base de tu backend Go (cambia 'TU_IP_O_DOMINIO' por la dirección real de tu servidor Go)
-const API_BASE_URL = "http://TU_IP_O_DOMINIO:8080"; // Ejemplo: "http://192.168.1.50:8080" o "http://TU_DOMINIO.com:8080"
+// URL base de tu backend Go en Render
+const API_BASE_URL = "https://contacoop.onrender.com";
 
 // Conciliación bancaria: se calcula primero y solo se guarda si el usuario
 // acepta el resultado. El lado del banco y el de los libros se muestran por
