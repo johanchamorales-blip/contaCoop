@@ -3,6 +3,12 @@ FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
+
+# En la etapa builder:
+RUN mkdir -p /app/data
+#Copiar el .data del local al servidor
+COPY ./data ./data
+
 # Copiar go.mod y go.sum si existe (usando wildcard)
 COPY go.mod go.sum* ./
 RUN go mod download
