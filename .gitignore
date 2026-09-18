@@ -69,3 +69,6 @@ node_modules/
 .dataconnect
 .neon
 .env.local
+
+# Reportes Excel generados a partir de plantillas/
+generados/
