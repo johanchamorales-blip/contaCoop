@@ -1,1 +1,46 @@
-[]
+[
+  {
+    "id": 1,
+    "cuenta_id": 1,
+    "mes": 9,
+    "anio": 2026,
+    "fecha_corte": "2026-09-30",
+    "saldo_libros": 76599.75,
+    "saldo_libros_ajustado": 76949.75,
+    "saldo_estado_cuenta": 65900.5,
+    "cheques_circulacion": 1250.75,
+    "depositos_en_transito": 12300,
+    "notas_debito": 150,
+    "notas_credito": 500,
+    "ajustes": 0,
+    "subtotal_banco": 76949.75,
+    "saldo_conciliado": 76949.75,
+    "diferencia_con_libros": 0,
+    "fecha_saldo_estado_cuenta": "2026-09-30",
+    "fecha_depositos_en_transito": "2026-09-18",
+    "fecha_notas_debito": "2026-09-28",
+    "fecha_notas_credito": "2026-09-29",
+    "fecha_lugar": "Guatemala, 30/09/2026",
+    "usuario": "Johan",
+    "cheques_en_circulacion_detalle": [
+      {
+        "id": 4,
+        "cuenta_id": 1,
+        "tipo": "EGRESO",
+        "fecha_registro": "2026-09-12T16:00:00Z",
+        "fecha_operacion": "2026-09-12",
+        "fecha_emision_cheque": "2026-09-12",
+        "numero_documento": "CH-1002",
+        "beneficiario": "Papelería La Luna",
+        "solicitante": "Johan",
+        "concepto": "Compra de suministros de oficina (Factura F-991)",
+        "monto": 1250.75,
+        "estado": "EMITIDO",
+        "saldo_inicial": 79900.5,
+        "saldo_actual": 78649.75,
+        "usuario": "Johan"
+      }
+    ],
+    "fecha_creacion": "2026-09-18T20:00:00Z"
+  }
+]

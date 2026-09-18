@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "id": 1,
+    "nombre": "Cooperativa de Desarrollo R.L.",
+    "direccion": "6a. Avenida 3-45, Zona 1, Ciudad de Guatemala",
+    "nit": "1234567-9",
+    "telefono": "2230-0502"
+  }
+]
