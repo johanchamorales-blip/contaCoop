@@ -41,6 +41,14 @@ func main() {
 	mux.HandleFunc("/api/auth/logout", handlers.Logout)
 	mux.HandleFunc("/api/auth/registro", handlers.Registro)
 
+	// Heartbeat para mantener activo el servicio en Render (plan gratuito)
+	mux.HandleFunc("/api/ping", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "https://contacoop-52c82.web.app")
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("pong"))
+	})
+
 	// Catálogos y operación. El segundo argumento es el permiso exigido para
 	// escribir; las lecturas quedan abiertas a cualquier sesión válida.
 	mux.HandleFunc("/api/cooperativas", handlers.RequiereSesion("catalogos", handlers.Cooperativas))
