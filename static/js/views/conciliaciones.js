@@ -4,6 +4,9 @@ import { escapar, datosFormulario, opcionesMes } from '../core/dom.js';
 import { dinero, fecha, periodo } from '../core/formato.js';
 import { exito, problema, pendiente } from '../core/notificaciones.js';
 
+// URL base de tu backend Go (cambia 'TU_IP_O_DOMINIO' por la dirección real de tu servidor Go)
+const API_BASE_URL = "http://TU_IP_O_DOMINIO:8080"; // Ejemplo: "http://192.168.1.50:8080" o "http://TU_DOMINIO.com:8080"
+
 // Conciliación bancaria: se calcula primero y solo se guarda si el usuario
 // acepta el resultado. El lado del banco y el de los libros se muestran por
 // separado para que la diferencia sea evidente.
@@ -247,7 +250,7 @@ export class Conciliaciones extends Vista {
       problema('Guarda la conciliación antes de descargarla.');
       return;
     }
-    window.location.href = `/api/conciliaciones.xlsx?id=${encodeURIComponent(this.calculo.reporte.id)}`;
+    window.location.href = `${API_BASE_URL}/api/conciliaciones.xlsx?id=${encodeURIComponent(this.calculo.reporte.id)}`;
   }
 
   descargarCSV() {
@@ -255,7 +258,7 @@ export class Conciliaciones extends Vista {
       problema('Guarda la conciliación antes de descargarla.');
       return;
     }
-    window.location.href = `/api/conciliaciones.csv?id=${encodeURIComponent(this.calculo.reporte.id)}`;
+    window.location.href = `${API_BASE_URL}/api/conciliaciones.csv?id=${encodeURIComponent(this.calculo.reporte.id)}`;
   }
 
   async cargarHistorial() {

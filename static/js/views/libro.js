@@ -4,6 +4,9 @@ import { escapar, opcionesMes } from '../core/dom.js';
 import { dinero, fecha, periodo } from '../core/formato.js';
 import { problema } from '../core/notificaciones.js';
 
+// URL base de tu backend Go (cambia 'TU_IP_O_DOMINIO' por la dirección real de tu servidor Go)
+const API_BASE_URL = "http://TU_IP_O_DOMINIO:8080"; // Ejemplo: "http://192.168.1.50:8080" o "http://TU_DOMINIO.com:8080"
+
 // Libro de bancos: la tabla con saldo corrido y, al imprimir, el archivo Excel
 // con el formato oficial de la cooperativa.
 export class LibroBancos extends Vista {
@@ -21,7 +24,7 @@ export class LibroBancos extends Vista {
     return `
       ${this.encabezado('Libro de bancos', 'Saldo corrido por cuenta y periodo. Imprime con el formato oficial de la cooperativa.', `
         <button type="button" class="secundario" data-accion="imprimir">Exportar Excel</button>
-        <button type="button" class="secundario" data-accion="csv">Exportar CSV</button>`)}
+        <button type="button" class="secundario" data-accion="csv">Exportar CSV</button>`}
 
       <div class="filtros">
         <label>Mes<select data-campo="mes">${opcionesMes(ahora.getMonth() + 1, true)}</select></label>
@@ -54,19 +57,13 @@ export class LibroBancos extends Vista {
     this.alHacerClic('[data-accion="csv"]', () => this.exportarCSV());
   }
 
-  filtros() {
-    const mes = this.$('[data-campo="mes"]').value;
-    const anio = this.$('[data-campo="anio"]').value;
-    return { mes: mes || '', anio: mes ? anio : '' };
-  }
-
   exportar() {
     const cuenta = this.estado.cuenta;
     if (!cuenta) {
       problema('Selecciona una cuenta antes de exportar.');
       return;
     }
-    window.location.href = `/api/libro-bancos.xlsx?${consulta({ cuenta_id: cuenta.id, ...this.filtros() })}`;
+    window.location.href = `${API_BASE_URL}/api/libro-bancos.xlsx?${consulta({ cuenta_id: cuenta.id, ...this.filtros() })}`;
   }
 
   exportarCSV() {
@@ -75,7 +72,13 @@ export class LibroBancos extends Vista {
       problema('Selecciona una cuenta antes de exportar.');
       return;
     }
-    window.location.href = `/api/libro-bancos.csv?${consulta({ cuenta_id: cuenta.id, ...this.filtros() })}`;
+    window.location.href = `${API_BASE_URL}/api/libro-bancos.csv?${consulta({ cuenta_id: cuenta.id, ...this.filtros() })}`;
+  }
+
+  filtros() {
+    const mes = this.$('[data-campo="mes"]').value;
+    const anio = this.$('[data-campo="anio"]').value;
+    return { mes: mes || '', anio: mes ? anio : '' };
   }
 
   async actualizar() {
