@@ -258,7 +258,27 @@ export class Conciliaciones extends Vista {
       problema('Guarda la conciliación antes de descargarla.');
       return;
     }
-    window.location.href = `${API_BASE_URL}/api/conciliaciones.csv?id=${encodeURIComponent(this.calculo.reporte.id)}`;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/conciliaciones.csv?id=${encodeURIComponent(this.calculo.reporte.id)}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      // Disparar descarga en segundo plano
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `conciliacion_${this.calculo.reporte.id}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Limpieza inmediata
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Fallo descarga CSV conciliación:", error);
+      problema('Error al generar el CSV. Revisa la consola (F12).');
+    }
   }
 
   async cargarHistorial() {

@@ -66,13 +66,33 @@ export class LibroBancos extends Vista {
     window.location.href = `${API_BASE_URL}/api/libro-bancos.xlsx?${consulta({ cuenta_id: cuenta.id, ...this.filtros() })}`;
   }
 
-  exportarCSV() {
+  async exportarCSV() {
     const cuenta = this.estado.cuenta;
     if (!cuenta) {
       problema('Selecciona una cuenta antes de exportar.');
       return;
     }
-    window.location.href = `${API_BASE_URL}/api/libro-bancos.csv?${consulta({ cuenta_id: cuenta.id, ...this.filtros() })}`;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/libro-bancos.csv?${consulta({ cuenta_id: cuenta.id, ...this.filtros() })}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      // Disparar descarga en segundo plano (sin recargar la pestaña)
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'libro-bancos.csv';
+      document.body.appendChild(a);
+      a.click();
+      
+      // Limpieza inmediata
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Fallo descarga CSV:", error);
+      problema('Error al generar el CSV. Revisa la consola (F12).');
+    }
   }
 
   filtros() {
