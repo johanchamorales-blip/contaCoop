@@ -258,9 +258,23 @@ export class Conciliaciones extends Vista {
       problema('Guarda la conciliación antes de descargarla.');
       return;
     }
+    
+    // Mostrar URL tentativo para depuración
+    const url = `${API_BASE_URL}/api/conciliaciones.csv?id=${encodeURIComponent(this.calculo.reporte.id)}`;
+    console.log("🔗 Intentando descargar desde:", url);
+    
     try {
-      const response = await fetch(`${API_BASE_URL}/api/conciliaciones.csv?id=${encodeURIComponent(this.calculo.reporte.id)}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const response = await fetch(url);
+      console.log("📡 Respuesta del servidor:", response.status, response.statusText);
+      
+      if (!response.ok) {
+        // Si es 404, dar instrucción específica
+        if (response.status === 404) {
+          problema(`❌ Error 404: El servidor no encontró la ruta.\n\nProbable causa:\n- El backend en Render está dormido\n- Intenta entrar a https://contacoop.onrender.com primero para despertarlo\n- Luego vuelve a hacer clic en CSV`);
+          return;
+        }
+        throw new Error(`HTTP ${response.status}`);
+      }
       
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -275,9 +289,11 @@ export class Conciliaciones extends Vista {
       // Limpieza inmediata
       a.remove();
       window.URL.revokeObjectURL(url);
+      
+      console.log("✅ Descarga iniciada exitosamente");
     } catch (error) {
-      console.error("Fallo descarga CSV conciliación:", error);
-      problema('Error al generar el CSV. Revisa la consola (F12).');
+      console.error("❌ Error en descarga CSV:", error);
+      problema(`Error de conexión: ${error.message}\n\nVerifica la consola (F12) para más detalles.`);
     }
   }
 

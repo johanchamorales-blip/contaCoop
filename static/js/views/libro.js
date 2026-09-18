@@ -72,9 +72,22 @@ export class LibroBancos extends Vista {
       problema('Selecciona una cuenta antes de exportar.');
       return;
     }
+    
+    // Mostrar URL tentativa para depuración
+    const url = `${API_BASE_URL}/api/libro-bancos.csv?${consulta({ cuenta_id: cuenta.id, ...this.filtros() })}`;
+    console.log("🔗 Intentando descargar libro desde:", url);
+    
     try {
-      const response = await fetch(`${API_BASE_URL}/api/libro-bancos.csv?${consulta({ cuenta_id: cuenta.id, ...this.filtros() })}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const response = await fetch(url);
+      console.log("📡 Respuesta del servidor:", response.status, response.statusText);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          problema(`❌ Error 404: El servidor no encontró la ruta.\n\nProbable causa:\n- El backend en Render está dormido\n- Intenta entrar a https://contacoop.onrender.com primero para despertarlo\n- Luego vuelve a hacer clic en CSV`);
+          return;
+        }
+        throw new Error(`HTTP ${response.status}`);
+      }
       
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -89,9 +102,11 @@ export class LibroBancos extends Vista {
       // Limpieza inmediata
       a.remove();
       window.URL.revokeObjectURL(url);
+      
+      console.log("✅ Descarga iniciada exitosamente");
     } catch (error) {
-      console.error("Fallo descarga CSV:", error);
-      problema('Error al generar el CSV. Revisa la consola (F12).');
+      console.error("❌ Error en descarga CSV:", error);
+      problema(`Error de conexión: ${error.message}\n\nVerifica la consola (F12) para más detalles.`);
     }
   }
 
