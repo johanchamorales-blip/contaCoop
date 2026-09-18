@@ -9,6 +9,7 @@ package reportes
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -105,20 +106,46 @@ type DatosCuenta struct {
 // rutaSalida. Las celdas de fórmula (columna G y totales A9, D9, G9) no se
 // tocan: se respetan las fórmulas existentes en la plantilla.
 func GenerarReporteLibroBancos(datos DatosCuenta, movimientos []MovimientoBanco, rutaSalida string) error {
-	f, err := excelize.OpenFile(PlantillaLibroBancos)
+	f, err := llenarLibroBancos(datos, movimientos)
 	if err != nil {
-		return fmt.Errorf("abrir plantilla %s: %w", PlantillaLibroBancos, err)
+		return err
 	}
 	defer f.Close()
+	return guardar(f, rutaSalida)
+}
 
+// GenerarReporteLibroBancosWriter escribe el reporte del libro de bancos
+// directamente en w, sin pasar por un archivo temporal. Es la variante usada
+// por los handlers HTTP para descargar el archivo en una sola pasada.
+func GenerarReporteLibroBancosWriter(datos DatosCuenta, movimientos []MovimientoBanco, w io.Writer) error {
+	f, err := llenarLibroBancos(datos, movimientos)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	if _, err := f.WriteTo(w); err != nil {
+		return fmt.Errorf("escribir libro de bancos: %w", err)
+	}
+	return nil
+}
+
+// llenarLibroBancos abre la plantilla del libro de bancos, escribe el
+// encabezado y los movimientos en el rango 13-112 y devuelve el archivo
+// listo para guardar o escribir. El llamador es responsable de cerrarlo.
+func llenarLibroBancos(datos DatosCuenta, movimientos []MovimientoBanco) (*excelize.File, error) {
+	f, err := excelize.OpenFile(PlantillaLibroBancos)
+	if err != nil {
+		return nil, fmt.Errorf("abrir plantilla %s: %w", PlantillaLibroBancos, err)
+	}
 	if idx, _ := f.GetSheetIndex(hojaLibroBancos); idx < 0 {
-		return fmt.Errorf("la plantilla %s no contiene la hoja %q", PlantillaLibroBancos, hojaLibroBancos)
+		f.Close()
+		return nil, fmt.Errorf("la plantilla %s no contiene la hoja %q", PlantillaLibroBancos, hojaLibroBancos)
 	}
 
 	// Encabezado / metadatos de la cuenta.
 	encabezado := []struct {
-		celda  string
-		valor  any
+		celda string
+		valor any
 	}{
 		{"B4", datos.Empresa},
 		{"E4", datos.Banco},
@@ -130,7 +157,8 @@ func GenerarReporteLibroBancos(datos DatosCuenta, movimientos []MovimientoBanco,
 	}
 	for _, c := range encabezado {
 		if err := escribirCelda(f, hojaLibroBancos, c.celda, c.valor); err != nil {
-			return fmt.Errorf("encabezado libro de bancos: %w", err)
+			f.Close()
+			return nil, fmt.Errorf("encabezado libro de bancos: %w", err)
 		}
 	}
 
@@ -138,7 +166,8 @@ func GenerarReporteLibroBancos(datos DatosCuenta, movimientos []MovimientoBanco,
 	for i := range movimientos {
 		fila := filaInicialMovimientos + i
 		if fila > filaFinalMovimientos {
-			return fmt.Errorf(
+			f.Close()
+			return nil, fmt.Errorf(
 				"demasiados movimientos: la plantilla admite %d (filas %d-%d)",
 				filaFinalMovimientos-filaInicialMovimientos+1,
 				filaInicialMovimientos, filaFinalMovimientos,
@@ -147,30 +176,37 @@ func GenerarReporteLibroBancos(datos DatosCuenta, movimientos []MovimientoBanco,
 		m := movimientos[i]
 		filaCelda := func(col int) string { return nombreCelda(col, fila) }
 		if err := escribirCelda(f, hojaLibroBancos, filaCelda(libroColFecha), m.Fecha); err != nil {
-			return err
+			f.Close()
+			return nil, err
 		}
 		if err := escribirCelda(f, hojaLibroBancos, filaCelda(libroColDocumento), m.Documento); err != nil {
-			return err
+			f.Close()
+			return nil, err
 		}
 		if err := escribirCelda(f, hojaLibroBancos, filaCelda(libroColTipo), m.Tipo); err != nil {
-			return err
+			f.Close()
+			return nil, err
 		}
 		if err := escribirCelda(f, hojaLibroBancos, filaCelda(libroColConcepto), m.Concepto); err != nil {
-			return err
+			f.Close()
+			return nil, err
 		}
 		if err := escribirCelda(f, hojaLibroBancos, filaCelda(libroColIngreso), m.Ingreso); err != nil {
-			return err
+			f.Close()
+			return nil, err
 		}
 		if err := escribirCelda(f, hojaLibroBancos, filaCelda(libroColEgreso), m.Egreso); err != nil {
-			return err
+			f.Close()
+			return nil, err
 		}
 		// Columna G = saldo acumulado: NO se escribe (fórmula de la plantilla).
 		if err := escribirCelda(f, hojaLibroBancos, filaCelda(libroColReferencia), m.Referencia); err != nil {
-			return err
+			f.Close()
+			return nil, err
 		}
 	}
 
-	return guardar(f, rutaSalida)
+	return f, nil
 }
 
 // GenerarReporteConciliacion abre la plantilla Conciliacion_Bancaria.xlsx,
@@ -183,14 +219,50 @@ func GenerarReporteConciliacion(
 	partidas []PartidaConciliatoria,
 	rutaSalida string,
 ) error {
-	f, err := excelize.OpenFile(PlantillaConciliacion)
+	f, err := llenarConciliacion(datos, saldoLibros, saldoBanco, partidas)
 	if err != nil {
-		return fmt.Errorf("abrir plantilla %s: %w", PlantillaConciliacion, err)
+		return err
 	}
 	defer f.Close()
+	return guardar(f, rutaSalida)
+}
 
+// GenerarReporteConciliacionWriter escribe el reporte de conciliación
+// directamente en w, sin pasar por un archivo temporal. Es la variante usada
+// por los handlers HTTP para descargar el archivo en una sola pasada.
+func GenerarReporteConciliacionWriter(
+	datos DatosCuenta,
+	saldoLibros, saldoBanco float64,
+	partidas []PartidaConciliatoria,
+	w io.Writer,
+) error {
+	f, err := llenarConciliacion(datos, saldoLibros, saldoBanco, partidas)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	if _, err := f.WriteTo(w); err != nil {
+		return fmt.Errorf("escribir conciliación bancaria: %w", err)
+	}
+	return nil
+}
+
+// llenarConciliacion abre la plantilla de conciliación, escribe el encabezado,
+// los saldos iniciales (B12, C12) y las partidas conciliatorias en el rango
+// 20-69, y devuelve el archivo listo para guardar o escribir. El llamador es
+// responsable de cerrarlo.
+func llenarConciliacion(
+	datos DatosCuenta,
+	saldoLibros, saldoBanco float64,
+	partidas []PartidaConciliatoria,
+) (*excelize.File, error) {
+	f, err := excelize.OpenFile(PlantillaConciliacion)
+	if err != nil {
+		return nil, fmt.Errorf("abrir plantilla %s: %w", PlantillaConciliacion, err)
+	}
 	if idx, _ := f.GetSheetIndex(hojaConciliacion); idx < 0 {
-		return fmt.Errorf("la plantilla %s no contiene la hoja %q", PlantillaConciliacion, hojaConciliacion)
+		f.Close()
+		return nil, fmt.Errorf("la plantilla %s no contiene la hoja %q", PlantillaConciliacion, hojaConciliacion)
 	}
 
 	// Datos generales de la conciliación.
@@ -207,23 +279,27 @@ func GenerarReporteConciliacion(
 	}
 	for _, c := range encabezado {
 		if err := escribirCelda(f, hojaConciliacion, c.celda, c.valor); err != nil {
-			return fmt.Errorf("encabezado conciliación: %w", err)
+			f.Close()
+			return nil, fmt.Errorf("encabezado conciliación: %w", err)
 		}
 	}
 
 	// Saldos iniciales: de ellos dependen las fórmulas del resumen.
 	if err := escribirCelda(f, hojaConciliacion, "B12", saldoLibros); err != nil {
-		return err
+		f.Close()
+		return nil, err
 	}
 	if err := escribirCelda(f, hojaConciliacion, "C12", saldoBanco); err != nil {
-		return err
+		f.Close()
+		return nil, err
 	}
 
 	// Detalle de partidas conciliatorias: fila 20 en adelante.
 	for i := range partidas {
 		fila := filaInicialPartidas + i
 		if fila > filaFinalPartidas {
-			return fmt.Errorf(
+			f.Close()
+			return nil, fmt.Errorf(
 				"demasiadas partidas: la plantilla admite %d (filas %d-%d)",
 				filaFinalPartidas-filaInicialPartidas+1,
 				filaInicialPartidas, filaFinalPartidas,
@@ -232,33 +308,41 @@ func GenerarReporteConciliacion(
 		p := partidas[i]
 		filaCelda := func(col int) string { return nombreCelda(col, fila) }
 		if err := escribirCelda(f, hojaConciliacion, filaCelda(concColFecha), p.Fecha); err != nil {
-			return err
+			f.Close()
+			return nil, err
 		}
 		if err := escribirCelda(f, hojaConciliacion, filaCelda(concColReferencia), p.Referencia); err != nil {
-			return err
+			f.Close()
+			return nil, err
 		}
 		if err := escribirCelda(f, hojaConciliacion, filaCelda(concColDescripcion), p.Descripcion); err != nil {
-			return err
+			f.Close()
+			return nil, err
 		}
 		if err := escribirCelda(f, hojaConciliacion, filaCelda(concColTipo), p.Tipo); err != nil {
-			return err
+			f.Close()
+			return nil, err
 		}
 		if err := escribirCelda(f, hojaConciliacion, filaCelda(concColAjusteBanco), p.AjusteBanco); err != nil {
-			return err
+			f.Close()
+			return nil, err
 		}
 		if err := escribirCelda(f, hojaConciliacion, filaCelda(concColAjusteLibros), p.AjusteLibros); err != nil {
-			return err
+			f.Close()
+			return nil, err
 		}
 		if err := escribirCelda(f, hojaConciliacion, filaCelda(concColEstado), p.Estado); err != nil {
-			return err
+			f.Close()
+			return nil, err
 		}
 		if err := escribirCelda(f, hojaConciliacion, filaCelda(concColObservacion), p.Observacion); err != nil {
-			return err
+			f.Close()
+			return nil, err
 		}
 		// Columna I = importe absoluto: NO se escribe (fórmula de la plantilla).
 	}
 
-	return guardar(f, rutaSalida)
+	return f, nil
 }
 
 // AsegurarPlantillas garantiza que las plantillas base existan en

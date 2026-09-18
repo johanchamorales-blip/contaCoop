@@ -24,7 +24,7 @@ export class Conciliaciones extends Vista {
     return `
       ${this.encabezado('Conciliación bancaria', 'Los cheques emitidos sin cobrar se detectan solos como cheques en circulación.', `
         <button type="button" class="secundario" data-accion="imprimir">Imprimir</button>
-        <button type="button" class="secundario" data-accion="descargar">Descargar CSV</button>` )}
+        <button type="button" class="secundario" data-accion="descargar">Descargar Excel</button>` )}
 
       <div class="tarjeta no-imprimir">
         <h2>Datos del estado de cuenta</h2>
@@ -162,7 +162,7 @@ export class Conciliaciones extends Vista {
           ${r.usuario ? `<p>Elaboró: ${escapar(r.usuario)}</p>` : ''}
         </div>
         <div class="acciones no-imprimir">
-          ${guardada ? `<button type="button" class="secundario" data-accion="descargar-detalle">Descargar CSV</button>` : ''}
+          ${guardada ? `<button type="button" class="secundario" data-accion="descargar-detalle">Descargar Excel</button>` : ''}
           <button type="button" data-accion="imprimir-resultado">Imprimir esta conciliación</button>
         </div>
       </div>
@@ -237,11 +237,7 @@ export class Conciliaciones extends Vista {
   }
 
   imprimir() {
-    if (!this.calculo) {
-      problema('Primero calcula o abre una conciliación guardada.');
-      return;
-    }
-    window.print();
+    this.descargar();
   }
 
   descargar() {
@@ -249,7 +245,7 @@ export class Conciliaciones extends Vista {
       problema('Guarda la conciliación antes de descargarla.');
       return;
     }
-    window.location.href = `/api/conciliaciones.csv?id=${encodeURIComponent(this.calculo.reporte.id)}`;
+    window.location.href = `/api/conciliaciones.xlsx?id=${encodeURIComponent(this.calculo.reporte.id)}`;
   }
 
   async cargarHistorial() {

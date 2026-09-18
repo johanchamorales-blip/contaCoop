@@ -4,8 +4,8 @@ import { escapar, opcionesMes } from '../core/dom.js';
 import { dinero, fecha, periodo } from '../core/formato.js';
 import { problema } from '../core/notificaciones.js';
 
-// Libro de bancos: la tabla con saldo corrido y, al imprimir, el documento
-// formal con encabezado de la cooperativa y las cuatro firmas.
+// Libro de bancos: la tabla con saldo corrido y, al imprimir, el archivo Excel
+// con el formato oficial de la cooperativa.
 export class LibroBancos extends Vista {
   static titulo = 'Libro de bancos';
   static glifo = '≡';
@@ -20,8 +20,7 @@ export class LibroBancos extends Vista {
     const ahora = new Date();
     return `
       ${this.encabezado('Libro de bancos', 'Saldo corrido por cuenta y periodo. Imprime con el formato oficial de la cooperativa.', `
-        <button type="button" class="secundario" data-accion="csv">Exportar CSV</button>
-        <button type="button" data-accion="imprimir">Imprimir libro</button>`)}
+        <button type="button" class="secundario" data-accion="imprimir">Exportar Excel</button>`)}
 
       <div class="filtros">
         <label>Mes<select data-campo="mes">${opcionesMes(ahora.getMonth() + 1, true)}</select></label>
@@ -50,8 +49,7 @@ export class LibroBancos extends Vista {
     this.alHacerClic('[data-accion="consultar"]', () => { this.pagina = 1; this.actualizar(); });
     this.alHacerClic('[data-accion="anterior"]', () => { if (this.pagina > 1) { this.pagina -= 1; this.actualizar(); } });
     this.alHacerClic('[data-accion="siguiente"]', () => { this.pagina += 1; this.actualizar(); });
-    this.alHacerClic('[data-accion="imprimir"]', () => window.print());
-    this.alHacerClic('[data-accion="csv"]', () => this.exportar());
+    this.alHacerClic('[data-accion="imprimir"]', () => this.exportar());
   }
 
   filtros() {
@@ -66,7 +64,7 @@ export class LibroBancos extends Vista {
       problema('Selecciona una cuenta antes de exportar.');
       return;
     }
-    window.location.href = `/api/libro-bancos.csv?${consulta({ cuenta_id: cuenta.id, ...this.filtros() })}`;
+    window.location.href = `/api/libro-bancos.xlsx?${consulta({ cuenta_id: cuenta.id, ...this.filtros() })}`;
   }
 
   async actualizar() {
