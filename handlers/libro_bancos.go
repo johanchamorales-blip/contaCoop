@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"sistema-cuentas/services"
 )
@@ -58,6 +59,12 @@ func LibroBancosCSV(w http.ResponseWriter, r *http.Request) {
 
 	mes := queryInt(r, "mes", 0)
 	anio := queryInt(r, "anio", 0)
+	if mes == 0 {
+		mes = int(time.Now().Month())
+	}
+	if anio == 0 {
+		anio = time.Now().Year()
+	}
 	// Una sola llamada con todas las filas: así los totales y el saldo corrido
 	// del archivo coinciden exactamente con lo que se ve en pantalla.
 	completo := services.GenerarLibroBancos(cuenta, cooperativa, banco, movimientos, mes, anio, 1, 200)

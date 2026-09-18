@@ -20,7 +20,8 @@ export class LibroBancos extends Vista {
     const ahora = new Date();
     return `
       ${this.encabezado('Libro de bancos', 'Saldo corrido por cuenta y periodo. Imprime con el formato oficial de la cooperativa.', `
-        <button type="button" class="secundario" data-accion="imprimir">Exportar Excel</button>`)}
+        <button type="button" class="secundario" data-accion="imprimir">Exportar Excel</button>
+        <button type="button" class="secundario" data-accion="csv">Exportar CSV</button>`)}
 
       <div class="filtros">
         <label>Mes<select data-campo="mes">${opcionesMes(ahora.getMonth() + 1, true)}</select></label>
@@ -50,6 +51,7 @@ export class LibroBancos extends Vista {
     this.alHacerClic('[data-accion="anterior"]', () => { if (this.pagina > 1) { this.pagina -= 1; this.actualizar(); } });
     this.alHacerClic('[data-accion="siguiente"]', () => { this.pagina += 1; this.actualizar(); });
     this.alHacerClic('[data-accion="imprimir"]', () => this.exportar());
+    this.alHacerClic('[data-accion="csv"]', () => this.exportarCSV());
   }
 
   filtros() {
@@ -65,6 +67,15 @@ export class LibroBancos extends Vista {
       return;
     }
     window.location.href = `/api/libro-bancos.xlsx?${consulta({ cuenta_id: cuenta.id, ...this.filtros() })}`;
+  }
+
+  exportarCSV() {
+    const cuenta = this.estado.cuenta;
+    if (!cuenta) {
+      problema('Selecciona una cuenta antes de exportar.');
+      return;
+    }
+    window.location.href = `/api/libro-bancos.csv?${consulta({ cuenta_id: cuenta.id, ...this.filtros() })}`;
   }
 
   async actualizar() {

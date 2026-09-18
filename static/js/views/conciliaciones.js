@@ -24,7 +24,8 @@ export class Conciliaciones extends Vista {
     return `
       ${this.encabezado('Conciliación bancaria', 'Los cheques emitidos sin cobrar se detectan solos como cheques en circulación.', `
         <button type="button" class="secundario" data-accion="imprimir">Imprimir</button>
-        <button type="button" class="secundario" data-accion="descargar">Descargar Excel</button>` )}
+        <button type="button" class="secundario" data-accion="descargar">Descargar Excel</button>
+        <button type="button" class="secundario" data-accion="csv">Descargar CSV</button>`}
 
       <div class="tarjeta no-imprimir">
         <h2>Datos del estado de cuenta</h2>
@@ -63,8 +64,8 @@ export class Conciliaciones extends Vista {
                 <input name="ajuste_fecha" type="date">
               </span>
             </label>
-            <label class="ancho-total">Fecha y lugar<input name="fecha_lugar" placeholder="Guatemala, 31/08/2026"></label>
-          <label class="ancho-total">Observaciones<textarea name="observaciones" rows="2" placeholder="Notas para la comisión de vigilancia"></textarea></label>
+          <label class="ancho-total">Fecha y lugar<input name="fecha_lugar" placeholder="Guatemala, 31/08/2026"></label>
+        <label class="ancho-total">Observaciones<textarea name="observaciones" rows="2" placeholder="Notas para la comisión de vigilancia"></textarea></label>
           <div class="acciones">
             <button type="submit">Calcular conciliación</button>
             <button type="button" data-accion="guardar" disabled>Guardar conciliación</button>
@@ -85,6 +86,7 @@ export class Conciliaciones extends Vista {
     this.alHacerClic('[data-accion="guardar"]', () => this.guardar());
     this.alHacerClic('[data-accion="imprimir"]', () => this.imprimir());
     this.alHacerClic('[data-accion="descargar"]', () => this.descargar());
+    this.alHacerClic('[data-accion="csv"]', () => this.descargarCSV());
     this.alHacerClic('[data-ver-conciliacion]', (boton) => this.verGuardada(Number(boton.dataset.verConciliacion)));
   }
 
@@ -129,7 +131,7 @@ export class Conciliaciones extends Vista {
 
   async guardar() {
     const cuenta = this.estado.cuenta;
-    if (!cuenta || !this.calculo) return;
+    if (!this.calculo) return;
     try {
       const guardada = await api.crear('/api/conciliaciones', { cuenta_id: cuenta.id, ...this.datos() });
       this.calculo = guardada;
@@ -215,7 +217,7 @@ export class Conciliaciones extends Vista {
       </div>
       <div class="firmas">
         <div>Elaboró</div><div>Tesorero</div><div>Vo. Bo.</div><div>Presidente Comisión de Vigilancia</div>
-      </div>`;
+      </div>
 
     const botonImprimir = zona.querySelector('[data-accion="imprimir-resultado"]');
     if (botonImprimir) botonImprimir.addEventListener('click', () => this.imprimir());
@@ -246,6 +248,14 @@ export class Conciliaciones extends Vista {
       return;
     }
     window.location.href = `/api/conciliaciones.xlsx?id=${encodeURIComponent(this.calculo.reporte.id)}`;
+  }
+
+  descargarCSV() {
+    if (!this.calculo?.reporte?.id) {
+      problema('Guarda la conciliación antes de descargarla.');
+      return;
+    }
+    window.location.href = `/api/conciliaciones.csv?id=${encodeURIComponent(this.calculo.reporte.id)}`;
   }
 
   async cargarHistorial() {
