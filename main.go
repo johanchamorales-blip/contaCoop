@@ -12,6 +12,12 @@ import (
 	"sistema-cuentas/services"
 )
 
+// Orígenes desde los que el navegador puede llamar a esta API.
+var origenesPermitidos = map[string]bool{
+	"https://contacoop-52c82.web.app":             true,
+	"https://contacoop-production.up.railway.app": true,
+}
+
 func main() {
 	if err := prepararDatos(); err != nil {
 		log.Fatal(err)
@@ -43,7 +49,7 @@ func main() {
 
 	// Heartbeat para mantener activo el servicio en Render (plan gratuito)
 	mux.HandleFunc("/api/ping", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "https://contacoop-52c82.web.app")
+
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("pong"))
@@ -130,10 +136,14 @@ func prepararDatos() error {
 
 func registrarPeticiones(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "https://contacoop-52c82.web.app")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		origen := r.Header.Get("Origin")
+		if origenesPermitidos[origen] {
+			w.Header().Set("Access-Control-Allow-Origin", origen)
+			w.Header().Set("Vary", "Origin")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+		}
 
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
