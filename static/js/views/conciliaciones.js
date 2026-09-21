@@ -4,8 +4,8 @@ import { escapar, datosFormulario, opcionesMes } from '../core/dom.js';
 import { dinero, fecha, periodo } from '../core/formato.js';
 import { exito, problema, pendiente } from '../core/notificaciones.js';
 
-// URL base de tu backend Go en Render
-const API_BASE_URL = "https://contacoop.onrender.com";
+// URL base de tu backend Go en Railway
+const API_BASE_URL = "https://contacoop-production.up.railway.app";
 
 // Conciliación bancaria: se calcula primero y solo se guarda si el usuario
 // acepta el resultado. El lado del banco y el de los libros se muestran por
@@ -28,7 +28,7 @@ export class Conciliaciones extends Vista {
       ${this.encabezado('Conciliación bancaria', 'Los cheques emitidos sin cobrar se detectan solos como cheques en circulación.', `
         <button type="button" class="secundario" data-accion="imprimir">Imprimir</button>
         <button type="button" class="secundario" data-accion="descargar">Descargar Excel</button>
-        <button type="button" class="secundario" data-accion="csv">Descargar CSV</button>`}
+        <button type="button" class="secundario" data-accion="csv">Descargar CSV</button>`)}
 
       <div class="tarjeta no-imprimir">
         <h2>Datos del estado de cuenta</h2>
@@ -220,7 +220,7 @@ export class Conciliaciones extends Vista {
       </div>
       <div class="firmas">
         <div>Elaboró</div><div>Tesorero</div><div>Vo. Bo.</div><div>Presidente Comisión de Vigilancia</div>
-      </div>
+      </div>`;
 
     const botonImprimir = zona.querySelector('[data-accion="imprimir-resultado"]');
     if (botonImprimir) botonImprimir.addEventListener('click', () => this.imprimir());
@@ -253,7 +253,7 @@ export class Conciliaciones extends Vista {
     window.location.href = `${API_BASE_URL}/api/conciliaciones.xlsx?id=${encodeURIComponent(this.calculo.reporte.id)}`;
   }
 
-  descargarCSV() {
+  async descargarCSV() {
     if (!this.calculo?.reporte?.id) {
       problema('Guarda la conciliación antes de descargarla.');
       return;
@@ -261,34 +261,34 @@ export class Conciliaciones extends Vista {
     
     // Mostrar URL tentativo para depuración
     const url = `${API_BASE_URL}/api/conciliaciones.csv?id=${encodeURIComponent(this.calculo.reporte.id)}`;
-    console.log("🔗 Intentando descargar desde:", url);
+    console.log(" Intentando descargar desde:", url);
     
     try {
       const response = await fetch(url);
-      console.log("📡 Respuesta del servidor:", response.status, response.statusText);
+      console.log(" Respuesta del servidor:", response.status, response.statusText);
       
       if (!response.ok) {
         // Si es 404, dar instrucción específica
         if (response.status === 404) {
-          problema(`❌ Error 404: El servidor no encontró la ruta.\n\nProbable causa:\n- El backend en Render está dormido\n- Intenta entrar a https://contacoop.onrender.com primero para despertarlo\n- Luego vuelve a hacer clic en CSV`);
+          problema(` Error 404: El servidor no encontró la ruta.\n\nProbable causa:\n- El backend en Render está dormido\n- Intenta entrar a https://contacoop.onrender.com primero para despertarlo\n- Luego vuelve a hacer clic en CSV`);
           return;
         }
         throw new Error(`HTTP ${response.status}`);
       }
       
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const objUrl = window.URL.createObjectURL(blob);
       
       // Disparar descarga en segundo plano
       const a = document.createElement('a');
-      a.href = url;
+      a.href = objUrl;
       a.download = `conciliacion_${this.calculo.reporte.id}.csv`;
       document.body.appendChild(a);
       a.click();
       
       // Limpieza inmediata
       a.remove();
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(objUrl);
       
       console.log("✅ Descarga iniciada exitosamente");
     } catch (error) {
