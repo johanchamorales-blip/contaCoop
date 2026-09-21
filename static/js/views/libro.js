@@ -5,7 +5,7 @@ import { dinero, fecha, periodo } from '../core/formato.js';
 import { problema } from '../core/notificaciones.js';
 
 // URL base de tu backend Go en Render
-const API_BASE_URL = "https://contacoop-production.up.railway.app";
+const API_BASE_URL = "";
 
 // Libro de bancos: la tabla con saldo corrido y, al imprimir, el archivo Excel
 // con el formato oficial de la cooperativa.

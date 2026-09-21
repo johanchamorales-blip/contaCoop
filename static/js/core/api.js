@@ -14,7 +14,7 @@ export class ErrorAPI extends Error {
 }
 
 async function peticion(url, opciones = {}) {
-  const urlCompleta = url.startsWith('http') ? url : `https://contacoop.onrender.com${url}`;
+ const urlCompleta = url;
   const respuesta = await fetch(urlCompleta, {
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',

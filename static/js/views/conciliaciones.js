@@ -5,7 +5,7 @@ import { dinero, fecha, periodo } from '../core/formato.js';
 import { exito, problema, pendiente } from '../core/notificaciones.js';
 
 // URL base de tu backend Go en Railway
-const API_BASE_URL = "https://contacoop-production.up.railway.app";
+const API_BASE_URL = "";
 
 // Conciliación bancaria: se calcula primero y solo se guarda si el usuario
 // acepta el resultado. El lado del banco y el de los libros se muestran por
