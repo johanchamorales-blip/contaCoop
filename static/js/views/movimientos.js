@@ -122,20 +122,6 @@ export class Movimientos extends Vista {
               >
             </label>
 
-            <fieldset data-zona="boucher" class="boucher">
-              <legend>Boucher · datos de quien solicita el cheque</legend>
-              <p class="tenue" style="margin:0 0 10px">
-                Esta información respalda la autorización del cheque ante la federación.
-              </p>
-              <label>
-                Nombre de quien solicita
-                <input
-                  name="solicitante"
-                  placeholder="Nombre completo de quien pide el dinero"
-                >
-              </label>
-            </fieldset>
-
             <label>
               Concepto
               <input
@@ -309,10 +295,6 @@ export class Movimientos extends Vista {
     this.$('[data-zona="beneficiario"]').classList.toggle('oculto', !esEgreso);
     this.$('[data-zona="emision"]').classList.toggle('oculto', !esEgreso);
     this.$('[data-zona="deposito"]').classList.toggle('oculto', esEgreso);
-    this.$('[data-zona="boucher"]').classList.toggle('oculto', !esEgreso);
-
-    const campoSolicitante = this.$('[data-zona="boucher"] input[name="solicitante"]');
-    if (campoSolicitante) campoSolicitante.required = esEgreso;
 
     const campoBeneficiario = this.$('[data-zona="beneficiario"] input[name="beneficiario"]');
     if (campoBeneficiario) campoBeneficiario.required = esEgreso;
@@ -485,10 +467,6 @@ export class Movimientos extends Vista {
 
       beneficiario:
         datos.beneficiario ||
-        '',
-
-      solicitante:
-        datos.solicitante ||
         '',
 
       concepto:

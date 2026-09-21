@@ -10,14 +10,14 @@ export class Cooperativas extends Vista {
 
   plantilla() {
     return `
-      ${this.encabezado('Cooperativas', 'El NIT identifica a la cooperativa y se verifica con su dígito verificador.')}
+      ${this.encabezado('Cooperativas', 'El NIT identifica a la cooperativa. Puedes escribirlo con o sin guion: 1234567-8 o 12345678.')}
       <div class="columnas">
         <div class="tarjeta">
           <h2 data-zona="titulo-formulario">Nueva cooperativa</h2>
           <form class="formulario" data-formulario="cooperativa" style="margin-top:14px">
             <input type="hidden" name="id">
             <label>Nombre<input name="nombre" required placeholder="Ej. Micoope"></label>
-            <label>NIT<input name="nit" required placeholder="1234567-8" autocomplete="off"></label>
+            <label>NIT<input name="nit" required placeholder="1234567-8 (el guion es opcional)" autocomplete="off"></label>
             <label>Dirección<input name="direccion" placeholder="Zona, municipio, departamento"></label>
             <label>Teléfono<input name="telefono" placeholder="Opcional"></label>
             <div class="acciones">
@@ -45,7 +45,7 @@ export class Cooperativas extends Vista {
     const datos = datosFormulario(form);
     const carga = {
       nombre: datos.nombre,
-      nit: datos.nit,
+      nit: String(datos.nit || '').replace(/[-\s]/g, ''),
       direccion: datos.direccion || '',
       telefono: datos.telefono || '',
     };
