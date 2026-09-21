@@ -5,7 +5,7 @@ import { dinero, fecha, periodo } from '../core/formato.js';
 import { problema } from '../core/notificaciones.js';
 
 // URL base de tu backend Go en Render
-const API_BASE_URL = "https://contacoop.onrender.com";
+const API_BASE_URL = "https://contacoop-production.up.railway.app";
 
 // Libro de bancos: la tabla con saldo corrido y, al imprimir, el archivo Excel
 // con el formato oficial de la cooperativa.
@@ -22,9 +22,10 @@ export class LibroBancos extends Vista {
   plantilla() {
     const ahora = new Date();
     return `
-      ${this.encabezado('Libro de bancos', 'Saldo corrido por cuenta y periodo. Imprime con el formato oficial de la cooperativa.', `
-        <button type="button" class="secundario" data-accion="imprimir">Exportar Excel</button>
-        <button type="button" class="secundario" data-accion="csv">Exportar CSV</button>`}
+     ${this.encabezado('Libro de bancos', 'Saldo corrido por cuenta y periodo. Imprime con el formato oficial de la cooperativa.', `
+  <button type="button" class="secundario" data-accion="imprimir">Exportar Excel</button>
+  <button type="button" class="secundario" data-accion="csv">Exportar CSV</button>
+`)}
 
       <div class="filtros">
         <label>Mes<select data-campo="mes">${opcionesMes(ahora.getMonth() + 1, true)}</select></label>
