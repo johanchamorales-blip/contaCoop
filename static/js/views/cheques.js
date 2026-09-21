@@ -1,5 +1,5 @@
 import { Vista } from '../core/vista.js';
-import { api, consulta } from '../core/api.js';
+import { api, consulta, descargar } from '../core/api.js';
 import { escapar, opciones } from '../core/dom.js';
 import { dinero, fecha, hoy } from '../core/formato.js';
 import { problema } from '../core/notificaciones.js';
@@ -50,7 +50,8 @@ export class ChequesCirculacion extends Vista {
   }
 
   exportar() {
-    window.location.href = `/api/reportes/cheques-en-circulacion.csv?${consulta(this.parametros())}`;
+    descargar(`/api/reportes/cheques-en-circulacion.csv?${consulta(this.parametros())}`)
+      .catch((error) => problema(error.message));
   }
 
   async actualizar() {

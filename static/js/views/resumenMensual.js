@@ -1,5 +1,5 @@
 import { Vista } from '../core/vista.js';
-import { api, consulta } from '../core/api.js';
+import { api, consulta, descargar } from '../core/api.js';
 import { escapar, opcionesMes } from '../core/dom.js';
 import { dinero, periodo } from '../core/formato.js';
 import { problema } from '../core/notificaciones.js';
@@ -47,7 +47,8 @@ export class ResumenMensual extends Vista {
   }
 
   exportar() {
-    window.location.href = `/api/reportes/resumen-mensual.csv?${consulta(this.filtros())}`;
+    descargar(`/api/reportes/resumen-mensual.csv?${consulta(this.filtros())}`)
+      .catch((error) => problema(error.message));
   }
 
   async actualizar() {

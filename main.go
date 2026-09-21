@@ -9,11 +9,19 @@ import (
 	"time"
 
 	"sistema-cuentas/handlers"
+	"sistema-cuentas/reportes"
 	"sistema-cuentas/services"
 )
 
 func main() {
 	if err := prepararDatos(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Las plantillas Excel oficiales (plantillas/) son necesarias para
+	// exportar el libro de bancos y las conciliaciones. Si faltan por
+	// cualquier motivo, se regeneran con sus fórmulas y formatos.
+	if err := reportes.AsegurarPlantillas(); err != nil {
 		log.Fatal(err)
 	}
 

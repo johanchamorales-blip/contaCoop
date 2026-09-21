@@ -1,5 +1,5 @@
 import { Vista } from '../core/vista.js';
-import { api, consulta } from '../core/api.js';
+import { api, consulta, descargar } from '../core/api.js';
 import { escapar, datosFormulario } from '../core/dom.js';
 import { dinero, fecha, hoy } from '../core/formato.js';
 import { exito, problema, pendiente } from '../core/notificaciones.js';
@@ -612,8 +612,7 @@ export class Movimientos extends Vista {
     const rango =
       this.obtenerRango();
 
-    window.location.href =
-      `/api/movimientos.csv?${consulta({
+    descargar(`/api/movimientos.csv?${consulta({
         cuenta_id:
           cuenta.id,
 
@@ -631,7 +630,7 @@ export class Movimientos extends Vista {
 
         hasta:
           rango.hasta,
-      })}`;
+      })}`).catch((error) => problema(error.message));
   }
 
   async actualizar() {

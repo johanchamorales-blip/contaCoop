@@ -1,5 +1,5 @@
 import { Vista } from '../core/vista.js';
-import { api, consulta } from '../core/api.js';
+import { api, consulta, descargar } from '../core/api.js';
 import { escapar } from '../core/dom.js';
 import { dinero, MESES } from '../core/formato.js';
 import { problema } from '../core/notificaciones.js';
@@ -50,7 +50,8 @@ export class ReporteAnual extends Vista {
       problema('Selecciona una cuenta para exportar el reporte anual.');
       return;
     }
-    window.location.href = `/api/reportes/anual.csv?${consulta({ cuenta_id: cuenta.id, ...this.filtros() })}`;
+    descargar(`/api/reportes/anual.csv?${consulta({ cuenta_id: cuenta.id, ...this.filtros() })}`)
+      .catch((error) => problema(error.message));
   }
 
   async actualizar() {

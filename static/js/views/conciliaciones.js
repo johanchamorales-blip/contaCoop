@@ -1,11 +1,8 @@
 import { Vista } from '../core/vista.js';
-import { api, consulta } from '../core/api.js';
+import { api, consulta, descargar } from '../core/api.js';
 import { escapar, datosFormulario, opcionesMes } from '../core/dom.js';
 import { dinero, fecha, periodo } from '../core/formato.js';
 import { exito, problema, pendiente } from '../core/notificaciones.js';
-
-// URL base de tu backend Go en Railway
-const API_BASE_URL = "";
 
 // Conciliación bancaria: se calcula primero y solo se guarda si el usuario
 // acepta el resultado. El lado del banco y el de los libros se muestran por
@@ -242,7 +239,7 @@ export class Conciliaciones extends Vista {
   }
 
   imprimir() {
-    this.descargar();
+    window.print();
   }
 
   descargar() {
@@ -250,51 +247,17 @@ export class Conciliaciones extends Vista {
       problema('Guarda la conciliación antes de descargarla.');
       return;
     }
-    window.location.href = `${API_BASE_URL}/api/conciliaciones.xlsx?id=${encodeURIComponent(this.calculo.reporte.id)}`;
+    descargar(`/api/conciliaciones.xlsx?id=${encodeURIComponent(this.calculo.reporte.id)}`)
+      .catch((error) => problema(error.message));
   }
 
-  async descargarCSV() {
+  descargarCSV() {
     if (!this.calculo?.reporte?.id) {
       problema('Guarda la conciliación antes de descargarla.');
       return;
     }
-    
-    // Mostrar URL tentativo para depuración
-    const url = `${API_BASE_URL}/api/conciliaciones.csv?id=${encodeURIComponent(this.calculo.reporte.id)}`;
-    console.log(" Intentando descargar desde:", url);
-    
-    try {
-      const response = await fetch(url);
-      console.log(" Respuesta del servidor:", response.status, response.statusText);
-      
-      if (!response.ok) {
-        // Si es 404, dar instrucción específica
-        if (response.status === 404) {
-          problema(` Error 404: El servidor no encontró la ruta.\n\nProbable causa:\n- El backend en Render está dormido\n- Intenta entrar a https://contacoop.onrender.com primero para despertarlo\n- Luego vuelve a hacer clic en CSV`);
-          return;
-        }
-        throw new Error(`HTTP ${response.status}`);
-      }
-      
-      const blob = await response.blob();
-      const objUrl = window.URL.createObjectURL(blob);
-      
-      // Disparar descarga en segundo plano
-      const a = document.createElement('a');
-      a.href = objUrl;
-      a.download = `conciliacion_${this.calculo.reporte.id}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      
-      // Limpieza inmediata
-      a.remove();
-      window.URL.revokeObjectURL(objUrl);
-      
-      console.log("✅ Descarga iniciada exitosamente");
-    } catch (error) {
-      console.error("❌ Error en descarga CSV:", error);
-      problema(`Error de conexión: ${error.message}\n\nVerifica la consola (F12) para más detalles.`);
-    }
+    descargar(`/api/conciliaciones.csv?id=${encodeURIComponent(this.calculo.reporte.id)}`)
+      .catch((error) => problema(error.message));
   }
 
   async cargarHistorial() {

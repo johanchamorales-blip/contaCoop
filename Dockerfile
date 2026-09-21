@@ -27,6 +27,7 @@ COPY --from=builder /app/main .
 COPY --from=builder /app/templates ./templates
 COPY --from=builder /app/static ./static
 COPY --from=builder /app/data ./data
+COPY --from=builder /app/plantillas ./plantillas
 
 # Puerto por defecto
 EXPOSE 8080
