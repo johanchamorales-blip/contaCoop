@@ -130,14 +130,6 @@ export class Movimientos extends Vista {
               >
             </label>
 
-            <label data-zona="solicitante">
-              Solicitante (quién pide el cheque)
-              <input
-                name="solicitante"
-                placeholder="Nombre de quien solicita el cheque"
-              >
-            </label>
-
             <label>
               Concepto
               <input
