@@ -3,7 +3,7 @@ import { api, consulta, descargar } from '../core/api.js';
 import { escapar, datosFormulario } from '../core/dom.js';
 import { dinero, fecha, hoy } from '../core/formato.js';
 import { exito, problema, pendiente } from '../core/notificaciones.js';
-import { pedirTexto, pedirFecha } from '../core/dialogo.js';
+import { pedirTexto, pedirFecha, confirmar, presentar } from '../core/dialogo.js';
 
 function desplazarDias(valor, dias) {
   const d = new Date(`${valor}T00:00:00`);
@@ -119,6 +119,22 @@ export class Movimientos extends Vista {
               <input
                 name="beneficiario"
                 placeholder="A nombre de quién se emite"
+              >
+            </label>
+
+            <label data-zona="solicitante">
+              Solicitante (quién pide el cheque)
+              <input
+                name="solicitante"
+                placeholder="Nombre de quien solicita el cheque"
+              >
+            </label>
+
+            <label data-zona="solicitante">
+              Solicitante (quién pide el cheque)
+              <input
+                name="solicitante"
+                placeholder="Nombre de quien solicita el cheque"
               >
             </label>
 
@@ -293,6 +309,7 @@ export class Movimientos extends Vista {
 
     this.$('[data-zona="remitente"]').classList.toggle('oculto', esEgreso);
     this.$('[data-zona="beneficiario"]').classList.toggle('oculto', !esEgreso);
+    this.$('[data-zona="solicitante"]').classList.toggle('oculto', !esEgreso);
     this.$('[data-zona="emision"]').classList.toggle('oculto', !esEgreso);
     this.$('[data-zona="deposito"]').classList.toggle('oculto', esEgreso);
 
@@ -467,6 +484,14 @@ export class Movimientos extends Vista {
 
       beneficiario:
         datos.beneficiario ||
+        '',
+
+      solicitante:
+        datos.solicitante ||
+        '',
+
+      solicitante:
+        datos.solicitante ||
         '',
 
       concepto:

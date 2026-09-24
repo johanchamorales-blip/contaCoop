@@ -2,12 +2,12 @@ import { escapar } from './dom.js';
 
 // Diálogo modal que devuelve una promesa. Sustituye a confirm() y prompt()
 // para poder pedir, por ejemplo, el motivo de una anulación.
-function abrir({ titulo, cuerpo, confirmar = 'Confirmar', cancelar = 'Cancelar', peligro = false }) {
+function abrir({ titulo, cuerpo, confirmar = 'Confirmar', cancelar = 'Cancelar', peligro = false, clase = '' }) {
   return new Promise((resolver) => {
     const velo = document.createElement('div');
     velo.className = 'velo';
     velo.innerHTML = `
-      <div class="dialogo" role="dialog" aria-modal="true" aria-label="${escapar(titulo)}">
+      <div class="dialogo ${clase}" role="dialog" aria-modal="true" aria-label="${escapar(titulo)}">
         <h2>${escapar(titulo)}</h2>
         <div class="cuerpo-dialogo">${cuerpo}</div>
         <div class="acciones">
@@ -60,4 +60,10 @@ export function pedirFecha(titulo, etiqueta, valorInicial) {
     cuerpo: `<label>${escapar(etiqueta)}<input data-campo type="date" value="${escapar(valorInicial)}"></label>`,
     confirmar: 'Registrar',
   });
+}
+
+// Presenta contenido HTML arbitrario (p. ej. la vista previa de un cheque) en
+// un diálogo y devuelve `true` al confirmar o `false` al cancelar/cerrar.
+export function presentar({ titulo, cuerpo, confirmar = 'Confirmar', cancelar = 'Cancelar', clase = 'cheque-vista' }) {
+  return abrir({ titulo, cuerpo, confirmar, cancelar, clase });
 }
