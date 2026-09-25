@@ -378,6 +378,48 @@ tfoot td { font-weight: 600; background: var(--panel-alto); border-top: 1px soli
   gap: 14px;
 }
 .dialogo .acciones { justify-content: flex-end; }
+.dialogo.cheque-vista { width: min(700px, 100%); }
+
+/* ---------- Cheque ---------- */
+.cheque-forma {
+  width: 16.5cm;
+  height: 7cm;
+  box-sizing: border-box;
+  border: 1px solid var(--linea);
+  border-radius: 6px;
+  padding: 0.4cm 0.5cm;
+  background: #fff;
+  color: #111;
+  font-family: 'Courier New', Courier, monospace;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12cm;
+  max-width: 100%;
+}
+.cheque-forma-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 11pt;
+  border-bottom: 1px solid #333;
+  padding-bottom: 0.1cm;
+}
+.cheque-forma-fila { display: flex; align-items: baseline; gap: 0.3cm; font-size: 10pt; }
+.cheque-forma-fila > span:first-child { width: 3.1cm; flex: none; }
+.cheque-forma-dato { flex: 1; border-bottom: 1px dotted #777; min-height: 0.45cm; }
+.cheque-forma-valor { font-size: 12pt; font-weight: 700; }
+.cheque-forma-letras {
+  font-size: 10pt;
+  text-transform: uppercase;
+  border-top: 1px solid #333;
+  padding-top: 0.1cm;
+}
+.cheque-forma-pie {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9pt;
+  margin-top: auto;
+}
 
 /* ---------- Acceso ---------- */
 .acceso {

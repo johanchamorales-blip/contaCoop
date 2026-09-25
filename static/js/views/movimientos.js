@@ -1,7 +1,7 @@
 import { Vista } from '../core/vista.js';
 import { api, consulta, descargar } from '../core/api.js';
 import { escapar, datosFormulario } from '../core/dom.js';
-import { dinero, fecha, hoy } from '../core/formato.js';
+import { dinero, fecha, hoy, montoEnLetras } from '../core/formato.js';
 import { exito, problema, pendiente } from '../core/notificaciones.js';
 import { pedirTexto, pedirFecha, confirmar, presentar } from '../core/dialogo.js';
 
@@ -480,10 +480,7 @@ export class Movimientos extends Vista {
 
       solicitante:
         datos.solicitante ||
-        '',
-
-      solicitante:
-        datos.solicitante ||
+        datos.beneficiario ||
         '',
 
       concepto:
@@ -533,11 +530,79 @@ export class Movimientos extends Vista {
 
       await this.actualizar();
 
+      if (respuesta.movimiento?.tipo === 'EGRESO') {
+        await this.verCheque(respuesta.movimiento);
+      }
+
     } catch (error) {
       problema(
         error.message,
       );
     }
+  }
+
+  // Vista previa del cheque recién emitido. Usa solo los datos ya capturados
+  // (banco, número, fecha, beneficiario, concepto y monto) y al confirmar lo
+  // imprime a sus medidas reales de 16.5 cm x 7 cm, sin el resto de la
+  // pantalla ni los botones del diálogo.
+  async verCheque(movimiento) {
+    const cuenta = this.estado.cuenta;
+    const banco = cuenta ? this.estado.banco(cuenta.banco_id) : null;
+    const cooperativa = cuenta ? this.estado.cooperativa : null;
+
+    const fila = (etiqueta, valor, clase = '') =>
+      `
+        <div class="cheque-forma-fila">
+          <span>${escapar(etiqueta)}</span>
+          <span class="cheque-forma-dato ${clase}">${valor}</span>
+        </div>`;
+
+    const cuerpo = `
+      <div class="cheque-forma">
+        <div class="cheque-forma-cabecera">
+          <strong>${escapar(banco?.nombre || cuenta?.nombre || '')}</strong>
+          <span>No. ${escapar(movimiento.numero_documento || '')}</span>
+        </div>
+        ${fila('Fecha', escapar(fecha(movimiento.fecha_emision_cheque)))}
+        ${fila('A nombre de', escapar(movimiento.beneficiario || ''), 'cheque-forma-valor')}
+        ${fila('Concepto', escapar(movimiento.concepto || ''))}
+        ${fila('Valor', escapar(dinero(movimiento.monto)), 'cheque-forma-valor')}
+        <div class="cheque-forma-letras">${escapar(montoEnLetras(movimiento.monto))}</div>
+        <div class="cheque-forma-pie">
+          <span>${escapar(cuenta?.numero || '')}</span>
+          <span>${escapar(cooperativa?.nombre || '')}</span>
+        </div>
+      </div>`;
+
+    const imprimir = await presentar({
+      titulo: 'Cheque emitido',
+      cuerpo,
+      confirmar: 'Imprimir cheque',
+      cancelar: 'Cerrar',
+      clase: 'cheque-vista',
+    });
+
+    if (!imprimir) {
+      return;
+    }
+
+    document.body.classList.add('imprimiendo-cheque');
+    const pagina = document.createElement('style');
+    pagina.textContent = '@page { size: 16.5cm 7cm; margin: 0; }';
+    document.head.appendChild(pagina);
+
+    const limpiar = () => {
+      pagina.remove();
+      document.body.classList.remove('imprimiendo-cheque');
+    };
+
+    window.addEventListener('afterprint', limpiar, { once: true });
+    window.print();
+    window.setTimeout(() => {
+      if (!window.matchMedia('print').matches) {
+        limpiar();
+      }
+    }, 500);
   }
 
   async anular(id) {

@@ -33,6 +33,26 @@
     font-size: 9pt;
   }
   .firmas div { border-top: 1px solid #000; padding-top: 4px; }
+
+  /* Cheque: durante su impresión se aísla y ocupa toda la hoja. El @page de
+     16.5 cm x 7 cm lo inyecta el JS sólo mientras se imprime este cheque, para
+     no cambiar el papel de los reportes. */
+  body.imprimiendo-cheque .velo {
+    display: block !important;
+    position: static;
+    background: none;
+    padding: 0;
+  }
+  body.imprimiendo-cheque * { visibility: hidden; }
+  body.imprimiendo-cheque .cheque-forma,
+  body.imprimiendo-cheque .cheque-forma * { visibility: visible; }
+  body.imprimiendo-cheque .cheque-forma {
+    position: absolute;
+    left: 0;
+    top: 0;
+    border: none;
+    border-radius: 0;
+  }
 }
 
 .firmas { display: none; }
