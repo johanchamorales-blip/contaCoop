@@ -206,6 +206,36 @@ func llenarLibroBancos(datos DatosCuenta, movimientos []MovimientoBanco) (*excel
 		}
 	}
 
+	// Fila de total al final de la tabla, con el total de gastos (egresos) y de
+	// ingresos. Se escribe como fórmula para que Excel recalcule los importes
+	// si el usuario edita o agrega movimientos.
+	if len(movimientos) > 0 {
+		filaTotal := filaInicialMovimientos + len(movimientos)
+		ultima := filaInicialMovimientos + len(movimientos) - 1
+		if filaTotal <= filaFinalMovimientos {
+			celda := func(col int) string { return nombreCelda(col, filaTotal) }
+			rango := func(col int) string {
+				return fmt.Sprintf("SUM(%s:%s)", nombreCelda(col, filaInicialMovimientos), nombreCelda(col, ultima))
+			}
+			if err := escribirCelda(f, hojaLibroBancos, celda(libroColTipo), "TOTALES"); err != nil {
+				f.Close()
+				return nil, err
+			}
+			if err := escribirCelda(f, hojaLibroBancos, celda(libroColConcepto), "Total de gastos"); err != nil {
+				f.Close()
+				return nil, err
+			}
+			if err := f.SetCellFormula(hojaLibroBancos, celda(libroColIngreso), rango(libroColIngreso)); err != nil {
+				f.Close()
+				return nil, fmt.Errorf("total de ingresos del libro de bancos: %w", err)
+			}
+			if err := f.SetCellFormula(hojaLibroBancos, celda(libroColEgreso), rango(libroColEgreso)); err != nil {
+				f.Close()
+				return nil, fmt.Errorf("total de gastos del libro de bancos: %w", err)
+			}
+		}
+	}
+
 	return f, nil
 }
 
@@ -340,6 +370,35 @@ func llenarConciliacion(
 			return nil, err
 		}
 		// Columna I = importe absoluto: NO se escribe (fórmula de la plantilla).
+	}
+
+	// Fila de total al final de la tabla de partidas, con la suma de los
+	// ajustes al banco y a libros. Va como fórmula para que Excel la recalcule.
+	if len(partidas) > 0 {
+		filaTotal := filaInicialPartidas + len(partidas)
+		ultima := filaInicialPartidas + len(partidas) - 1
+		if filaTotal <= filaFinalPartidas {
+			celda := func(col int) string { return nombreCelda(col, filaTotal) }
+			rango := func(col int) string {
+				return fmt.Sprintf("SUM(%s:%s)", nombreCelda(col, filaInicialPartidas), nombreCelda(col, ultima))
+			}
+			if err := escribirCelda(f, hojaConciliacion, celda(concColTipo), "TOTALES"); err != nil {
+				f.Close()
+				return nil, err
+			}
+			if err := escribirCelda(f, hojaConciliacion, celda(concColDescripcion), "Total de gastos"); err != nil {
+				f.Close()
+				return nil, err
+			}
+			if err := f.SetCellFormula(hojaConciliacion, celda(concColAjusteBanco), rango(concColAjusteBanco)); err != nil {
+				f.Close()
+				return nil, fmt.Errorf("total de ajustes al banco: %w", err)
+			}
+			if err := f.SetCellFormula(hojaConciliacion, celda(concColAjusteLibros), rango(concColAjusteLibros)); err != nil {
+				f.Close()
+				return nil, fmt.Errorf("total de ajustes a libros: %w", err)
+			}
+		}
 	}
 
 	return f, nil

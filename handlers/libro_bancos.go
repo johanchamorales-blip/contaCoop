@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/csv"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -76,13 +75,7 @@ func LibroBancosCSV(w http.ResponseWriter, r *http.Request) {
 	}
 	filename += ".csv"
 
-	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
-	w.Header().Set("Content-Disposition", `attachment; filename="`+filename+`"`)
-
-	// BOM para que Excel en Windows respete los acentos.
-	_, _ = w.Write([]byte{0xEF, 0xBB, 0xBF})
-
-	cw := csv.NewWriter(w)
+	cw := nuevoCSV(w, filename)
 	_ = cw.Write([]string{"LIBRO DE BANCOS"})
 	_ = cw.Write([]string{"Cooperativa", completo.Meta.Cooperativa})
 	_ = cw.Write([]string{"NIT", completo.Meta.NIT})

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/csv"
 	"net/http"
 	"sort"
 	"strconv"
@@ -133,11 +132,7 @@ func MovimientosCSV(w http.ResponseWriter, r *http.Request) {
 		filename = strings.ToLower(raw) + "s.csv"
 	}
 
-	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
-	w.Header().Set("Content-Disposition", `attachment; filename="`+filename+`"`)
-	_, _ = w.Write([]byte{0xEF, 0xBB, 0xBF})
-
-	cw := csv.NewWriter(w)
+	cw := nuevoCSV(w, filename)
 	_ = cw.Write([]string{"REPORTE DE MOVIMIENTOS"})
 	_ = cw.Write([]string{"Cuenta", cuentaDeMovimientosLabel(cuentas, r)})
 	_ = cw.Write([]string{"Filtros", strings.Join(filtrosMovimientosTexto(r), " · ")})

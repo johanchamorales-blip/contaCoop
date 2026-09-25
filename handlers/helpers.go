@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"encoding/csv"
 	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -19,6 +21,22 @@ func writeJSON(w http.ResponseWriter, status int, data any) {
 
 func writeError(w http.ResponseWriter, status int, mensaje string) {
 	writeJSON(w, status, map[string]string{"error": mensaje})
+}
+
+// nuevoCSV prepara la descarga para que el archivo abra en una sola hoja con
+// formato de tabla, sin que Excel amontone cada fila en una única columna.
+// Logros: BOM UTF-8 (acentos legibles), separador ';' (el que usa Excel en
+// español) y la línea "sep=;" que Excel respeta aunque el equipo tenga otra
+// configuración regional.
+func nuevoCSV(w http.ResponseWriter, filename string) *csv.Writer {
+	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
+	w.Header().Set("Content-Disposition", `attachment; filename="`+filename+`"`)
+	_, _ = w.Write([]byte{0xEF, 0xBB, 0xBF})
+	_, _ = io.WriteString(w, "sep=;\r\n")
+	cw := csv.NewWriter(w)
+	cw.Comma = ';'
+	cw.UseCRLF = true
+	return cw
 }
 
 func readJSON(r *http.Request, dst any) error {

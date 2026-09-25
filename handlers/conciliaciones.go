@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/csv"
 	"fmt"
 	"net/http"
 	"sort"
@@ -112,11 +111,7 @@ func ConciliacionCSV(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filename := fmt.Sprintf("conciliacion_%04d-%02d_%d.csv", reporte.Anio, reporte.Mes, reporte.ID)
-	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
-	w.Header().Set("Content-Disposition", `attachment; filename="`+filename+`"`)
-	_, _ = w.Write([]byte{0xEF, 0xBB, 0xBF})
-
-	cw := csv.NewWriter(w)
+	cw := nuevoCSV(w, filename)
 	_ = cw.Write([]string{"CONCILIACIÓN BANCARIA"})
 	_ = cw.Write([]string{"Conciliación No.", strconv.Itoa(reporte.ID)})
 	_ = cw.Write([]string{"Periodo", periodoTexto(reporte.Mes, reporte.Anio)})

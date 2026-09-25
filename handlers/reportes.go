@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/csv"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -93,11 +92,7 @@ func ReporteChequesCirculacionCSV(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
-	w.Header().Set("Content-Disposition", `attachment; filename="`+filename+`"`)
-	_, _ = w.Write([]byte{0xEF, 0xBB, 0xBF})
-
-	cw := csv.NewWriter(w)
+	cw := nuevoCSV(w, filename)
 	_ = cw.Write([]string{"REPORTE DE CHEQUES EN CIRCULACIÓN"})
 	_ = cw.Write([]string{"Corte", resultado.Corte.String()})
 	_ = cw.Write([]string{"Total", strconv.Itoa(resultado.Conteo) + " cheque(s)", formatearDecimal(resultado.Monto)})
@@ -204,11 +199,7 @@ func ReporteResumenMensualCSV(w http.ResponseWriter, r *http.Request) {
 	resultado := services.GenerarResumenMensual(cuentas, cooperativas, bancos, movimientos, mes, anio)
 
 	filename := fmt.Sprintf("resumen_mensual_%04d-%02d.csv", anio, mes)
-	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
-	w.Header().Set("Content-Disposition", `attachment; filename="`+filename+`"`)
-	_, _ = w.Write([]byte{0xEF, 0xBB, 0xBF})
-
-	cw := csv.NewWriter(w)
+	cw := nuevoCSV(w, filename)
 	_ = cw.Write([]string{"RESUMEN MENSUAL POR CUENTA"})
 	_ = cw.Write([]string{"Periodo", periodoTexto(mes, anio)})
 	_ = cw.Write(nil)
@@ -286,11 +277,7 @@ func ReporteAnualCSV(w http.ResponseWriter, r *http.Request) {
 	resultado := services.GenerarReporteAnual(cuenta, cooperativa, banco, movimientos, anio)
 
 	filename := fmt.Sprintf("reporte_anual_%s_%d.csv", strings.ReplaceAll(cuenta.Numero, " ", "_"), anio)
-	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
-	w.Header().Set("Content-Disposition", `attachment; filename="`+filename+`"`)
-	_, _ = w.Write([]byte{0xEF, 0xBB, 0xBF})
-
-	cw := csv.NewWriter(w)
+	cw := nuevoCSV(w, filename)
 	_ = cw.Write([]string{"REPORTE ANUAL"})
 	_ = cw.Write([]string{"Cuenta", resultado.Numero + " " + resultado.Nombre})
 	_ = cw.Write([]string{"Banco", resultado.Banco})
